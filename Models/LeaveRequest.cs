@@ -10,7 +10,7 @@ namespace HRManager.Models
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
         public DateOnly RequestDate { get; set; }
-        public string UserId { get; set; } = string.Empty;
-        public User User { get; set; } = null!;
+        public int UserId { get; set; } 
+        public User User { get; set; } 
     }
 }
