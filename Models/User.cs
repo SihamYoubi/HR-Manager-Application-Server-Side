@@ -14,8 +14,6 @@ namespace HRManager.Models
         public string LastName { get; set; }
         [Required]
         public string Position { get; set; }
-        [Required]
-        public string Role { get; set; }
         public DateOnly EntryDate { get; set; }
         public ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
     }
