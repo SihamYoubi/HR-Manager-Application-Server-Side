@@ -1,4 +1,3 @@
-using HR_Manager.Data;
 using HRManager.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -17,26 +16,26 @@ builder.Services.AddIdentity<User, IdentityRole<int>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
-    };
-});
+builder.Services
+    .AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+    .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+            };
+        });
 
 
 builder.Services.AddAuthorization(); 
@@ -57,20 +56,19 @@ builder.Services.AddSwaggerGen(
             Description = "Entrez votre token JWT  (ex: eyJhbGci...)"
         });
 
-        c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+        c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement{
                 {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
+                    new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                    {
+                        Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                        {
+                            Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
                 }
-            },
-            Array.Empty<string>()
-        }
-    });
+        });
     }
     );
 
@@ -80,13 +78,23 @@ builder.Services.AddSwaggerGen(
 var app = builder.Build();
 
 // Seed des rôles
-/*
+
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
-    await DbInitializer.SeedRolesAsync(roleManager);
+    string[] roleNames = ["Admin", "Employee"];
+
+    foreach (var roleName in roleNames)
+    {
+        var roleExists = await roleManager.RoleExistsAsync(roleName);
+        if (!roleExists)
+        {
+            await roleManager.CreateAsync(new IdentityRole<int>(roleName));
+        }
+    }
+    //await DbInitializer.SeedRolesAsync(roleManager);
 }
-*/
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -98,9 +106,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

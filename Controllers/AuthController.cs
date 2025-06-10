@@ -1,6 +1,5 @@
 ﻿using HR_Manager.DTOs;
 using HRManager.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -30,13 +29,18 @@ namespace HR_Manager.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto model)
         {
+            // Vérifier si le rôle existe, 
+            if (!await _roleManager.RoleExistsAsync(model.Role))
+            {
+                return BadRequest("There is no such a role in the company");
+            }
+
             var user = new User
             {
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 UserName = model.Username,
                 Position = model.Position,
-                //Role = model.Role,
                 Email = model.Email
             };
 
@@ -45,19 +49,11 @@ namespace HR_Manager.Controllers
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
-            // Vérifier si le rôle existe, sinon le créer
-            if (!await _roleManager.RoleExistsAsync(model.Role))
-            {
-                var roleResult = await _roleManager.CreateAsync(new IdentityRole<int>(model.Role));
-                if (!roleResult.Succeeded)
-                    return BadRequest(roleResult.Errors);
-            }
-
-            // Assigner le rôle à l'utilisateur
+            // Assigner le rôle à l'utilisateur         
             var addRoleResult = await _userManager.AddToRoleAsync(user, model.Role);
             if (!addRoleResult.Succeeded)
                 return BadRequest(addRoleResult.Errors);
-
+            
             return Ok("User registered successfully with role assigned");
    
         }

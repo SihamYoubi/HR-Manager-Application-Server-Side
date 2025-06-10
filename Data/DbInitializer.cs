@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿/*
+using Microsoft.AspNetCore.Identity;
 
 namespace HR_Manager.Data
 {
@@ -9,13 +10,16 @@ namespace HR_Manager.Data
         {
             string[] roleNames = { "Admin", "Employee" };
 
+            
             foreach (var roleName in roleNames)
             {
                 var roleExist = await roleManager.RoleExistsAsync(roleName);
                 if (!roleExist)
-                    await roleManager.CreateAsync(new IdentityRole<int>(roleName));
-            }
+                   await roleManager.CreateAsync(new IdentityRole<int>(roleName));            
+        }
+            
         }
     }
 
 }
+*/
