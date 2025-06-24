@@ -2,8 +2,14 @@ using HRManager.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Text.Json.Serialization;
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,6 +21,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<User, IdentityRole<int>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+//enum
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 builder.Services
     .AddAuthentication(options =>
@@ -37,9 +50,22 @@ builder.Services
             };
         });
 
+//cors
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("http://localhost:5173", "https://localhost:7297")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                      });
+});
 
 builder.Services.AddAuthorization(); 
 builder.Services.AddEndpointsApiExplorer();
+
+//swagger configuration
 builder.Services.AddSwaggerGen(
     c =>
     {
@@ -67,7 +93,14 @@ builder.Services.AddSwaggerGen(
                         }
                     },
                     Array.Empty<string>()
-                }
+                }     
+        });
+
+        c.MapType<DateOnly>(() => new OpenApiSchema
+        {
+            Type = "string",
+            Format = "date",
+            Example = new OpenApiString("2025-07-18")
         });
     }
     );
@@ -104,6 +137,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

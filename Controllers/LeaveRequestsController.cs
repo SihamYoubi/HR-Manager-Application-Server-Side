@@ -39,7 +39,7 @@ public class LeaveRequestsController : ControllerBase
     // POST: api/LeaveRequests
     [Authorize(Roles = "Employee")]
     [HttpPost]
-    public async Task<IActionResult> Create(LeaveRequestDto dto)
+    public async Task<IActionResult> Create([FromBody] LeaveRequestDto dto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
