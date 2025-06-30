@@ -12,8 +12,14 @@ public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options ): ba
 			.HasOne(lr => lr.User)
 			.WithMany(u => u.LeaveRequests)
 			.HasForeignKey(lr => lr.UserId)
-			.HasPrincipalKey(u=>u.Id)
+			.HasPrincipalKey(u => u.Id)
 			.OnDelete(DeleteBehavior.Cascade);
+		modelBuilder.Entity<LeaveRequest>()
+			.Property(lr => lr.TypeOfLeave)
+			.HasConversion<string>();
+		modelBuilder.Entity<LeaveRequest>()
+			.Property(lr => lr.StatusLeave)
+			.HasConversion<string>();
 	}
 	public DbSet<LeaveRequest> LeaveRequests { get; set; }
 }

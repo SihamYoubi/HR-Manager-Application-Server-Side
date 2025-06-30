@@ -75,7 +75,9 @@ namespace HR_Manager.Controllers
             var claims = new List<Claim>
             {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email)
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim("firstName", user.FirstName ?? ""),
+            new Claim("lastName", user.LastName ?? ""),
             };
 
             foreach (var role in roles)
