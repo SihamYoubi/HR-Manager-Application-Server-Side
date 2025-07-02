@@ -19,21 +19,40 @@ public class LeaveRequestsController : ControllerBase
     }
 
     // GET: api/LeaveRequests
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Employee")]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var leaves = await _context.LeaveRequests.Include(l => l.User).ToListAsync();
+        //var leaves = await _context.LeaveRequests.Include(l => l.User).ToListAsync();
+        var leaves = await _context.LeaveRequests.ToListAsync();
         return Ok(leaves);
     }
 
     // GET: api/LeaveRequests/5
-    [HttpGet("{id}")]
+    [HttpGet("{id}")]   
     public async Task<IActionResult> GetById(int id)
     {
         var leave = await _context.LeaveRequests.FindAsync(id);
         if (leave == null) return NotFound();
         return Ok(leave);
+    }
+
+    //leaveRequests/user
+    [Authorize(Roles = "Employee")]
+    [HttpGet("user")]
+    public async Task<IActionResult> GetUserRequests()
+    {
+        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(userIdString, out int userId))
+        {
+            return Unauthorized();
+        }
+
+        var leaves = await _context.LeaveRequests
+            .Where(lr => lr.UserId == userId)
+            .ToListAsync();
+
+        return Ok(leaves);
     }
 
     // POST: api/LeaveRequests
